@@ -2,9 +2,21 @@
 
 set -e
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
 if [ ! -f "./xmir_base/xmir_init.py" ]; then
-	echo "ERROR: XMiR: Current working directory not correct!"
+	echo "ERROR: XMiR: project files not found near run.sh!"
 	exit 1
+fi
+
+if [ "$(uname -s)" = "Darwin" ]; then
+	if command -v brew >/dev/null 2>&1; then
+		BREW_LIBSSH2_PREFIX="$(brew --prefix libssh2 2>/dev/null || true)"
+		if [ -n "$BREW_LIBSSH2_PREFIX" ] && [ -d "$BREW_LIBSSH2_PREFIX/lib" ]; then
+			export DYLD_FALLBACK_LIBRARY_PATH="$BREW_LIBSSH2_PREFIX/lib${DYLD_FALLBACK_LIBRARY_PATH:+:$DYLD_FALLBACK_LIBRARY_PATH}"
+		fi
+	fi
 fi
 
 PY3_PATH=`which python3`
